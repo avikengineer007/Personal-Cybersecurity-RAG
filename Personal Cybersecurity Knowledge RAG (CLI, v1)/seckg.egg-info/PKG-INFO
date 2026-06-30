@@ -1,0 +1,101 @@
+Metadata-Version: 2.4
+Name: seckg
+Version: 0.1.0
+Summary: SecKnowledge - A personal RAG system for cybersecurity notes
+Author: Developer
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.0.0
+Requires-Dist: llama-index-core
+Requires-Dist: llama-index-readers-file
+Requires-Dist: llama-index-embeddings-huggingface
+Requires-Dist: llama-index-vector-stores-chroma
+Requires-Dist: chromadb
+Requires-Dist: watchdog
+Requires-Dist: google-genai
+Requires-Dist: rich
+Requires-Dist: python-dotenv
+Requires-Dist: pyyaml
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pypdf
+Requires-Dist: sentence-transformers
+
+# SecKnowledge (seckg)
+
+SecKnowledge is a personal RAG (Retrieval-Augmented Generation) command-line tool designed for cybersecurity students. It indexes local study notes (Markdown vaults) and certification materials (PDFs), allowing users to ask queries grounded exclusively in their own materials with exact source citations.
+
+## Features
+- **Local Embeddings**: Embeds documents using local/free Sentence-Transformers (`sentence-transformers/all-MiniLM-L6-v2`) via ChromaDB. Works offline for indexing.
+- **Smart Markdown Parsing**: Parses `.md` files by heading structures, preserving structural headers (e.g. `Security+ Notes > Network Security > Firewalls`) as query-time citation paths.
+- **Sliding-Window PDF Parsing**: Parses `.pdf` files page-by-page using PyPDF with structured overlaps, tracking page numbers in metadata.
+- **Incremental File Watching**: Background monitoring of the notes directory with watchdog. Re-indexes only new, modified, or deleted files incrementally.
+- **LLM Grounding (Gemini)**: Queries Google Gemini model using the `google-genai` SDK. Instructs the model to answer *only* using provided context and extracts citations cleanly.
+- **Rich CLI Rendering**: Displays formatted Markdown answers and sources lists in the terminal.
+
+---
+
+## Installation
+
+1. Clone or copy the project to your local machine.
+2. In the project directory, run:
+   ```bash
+   pip install -e .
+   ```
+   This will install the CLI tool and register the command `seckg` globally.
+
+3. Create a `.env` file in the root of the project with your Gemini API key:
+   ```env
+   GEMINI_API_KEY=your-gemini-api-key
+   ```
+
+4. Configure chunk sizes, top-k, and database persistence in `config.yaml`:
+   ```yaml
+   chroma:
+     persist_dir: "./chroma_db"
+     collection_name: "secknowledge"
+   embedding:
+     model_name: "sentence-transformers/all-MiniLM-L6-v2"
+   retrieval:
+     top_k: 5
+   chunking:
+     pdf:
+       chunk_size: 500
+       chunk_overlap: 50
+     watcher:
+       debounce_seconds: 2.0
+   ```
+
+---
+
+## Usage
+
+### 1. Ingest/Index a Directory
+Generate the initial database vector index for your obsidian vault or study folder:
+```bash
+seckg index /path/to/my/notes
+```
+
+### 2. Live File Watcher
+Run the file watcher in a dedicated terminal window to monitor file changes recursively (created, updated, deleted files) and incrementally sync them with ChromaDB:
+```bash
+seckg watch /path/to/my/notes
+```
+
+### 3. Ask a One-Shot Question
+Retrieve grounded answers directly from the command line:
+```bash
+seckg ask "How does Kerberos work?"
+```
+To override the retrieval parameter `k`:
+```bash
+seckg ask "How does Kerberos work?" --k 10
+```
+
+### 4. Interactive Chat (REPL)
+Launch a conversation session:
+```bash
+seckg chat
+```
+Press `Ctrl+C` or type `exit`/`quit` to stop the session.

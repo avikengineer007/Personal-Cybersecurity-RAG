@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seckg"
+version = "0.1.0"
+description = "SecKnowledge - A personal RAG system for cybersecurity notes"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Developer" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.0.0",
+    "llama-index-core",
+    "llama-index-readers-file",
+    "llama-index-embeddings-huggingface",
+    "llama-index-vector-stores-chroma",
+    "chromadb",
+    "watchdog",
+    "google-genai",
+    "rich",
+    "python-dotenv",
+    "pyyaml",
+    "pydantic>=2.0.0",
+    "pypdf",
+    "sentence-transformers"
+]
+
+[project.scripts]
+seckg = "seckg.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["seckg*"]

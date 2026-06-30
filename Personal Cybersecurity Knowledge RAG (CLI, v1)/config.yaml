@@ -1,0 +1,16 @@
+chroma:
+  persist_dir: "./chroma_db"
+  collection_name: "secknowledge"
+
+embedding:
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+
+retrieval:
+  top_k: 5
+
+chunking:
+  pdf:
+    chunk_size: 500
+    chunk_overlap: 50
+  watcher:
+    debounce_seconds: 2.0
